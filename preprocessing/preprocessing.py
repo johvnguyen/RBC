@@ -229,6 +229,8 @@ def Game2Dataset(fpath, max_seq_len = 100):
     game_history = GameHistory.from_file(fpath)
     fname = fname = os.path.splitext(os.path.basename(fpath))[0]
     input_history = []
+    black_input_history = []
+    white_input_history = []
     input_seqs = []
     outputs = []
 
@@ -262,14 +264,29 @@ def Game2Dataset(fpath, max_seq_len = 100):
             sensing_result = game_history.sense_result(turn)
             postsense_input = UpdateInputWithSense(presense_input, my_color = turn_player, sensing_result = sensing_result)
     
-        add_to_history(input_history, presense_input, max_seq_len = max_seq_len)
+        #add_to_history(input_history, presense_input, max_seq_len = max_seq_len)
+
+        if turn_player == 'white':
+            add_to_history(white_input_history, presense_input, max_seq_len = max_seq_len)
+            input_seqs.append(torch.stack(white_input_history, dim = 0))
+        else:
+            add_to_history(black_input_history, presense_input, max_seq_len = max_seq_len)
+            input_seqs.append(torch.stack(black_input_history, dim = 0))
         
-        input_seqs.append(torch.stack(input_history, dim = 0))
+        #input_seqs.append(torch.stack(input_history, dim = 0))
         outputs.append(output)
     
         if postsense_input is not None:
-            add_to_history(input_history, postsense_input, max_seq_len = max_seq_len)
-            input_seqs.append(torch.stack(input_history, dim = 0))
+            #add_to_history(input_history, postsense_input, max_seq_len = max_seq_len)
+
+            if turn_player == 'white':
+                add_to_history(white_input_history, presense_input, max_seq_len = max_seq_len)
+                input_seqs.append(torch.stack(white_input_history, dim = 0))
+            else:
+                add_to_history(black_input_history, presense_input, max_seq_len = max_seq_len)
+                input_seqs.append(torch.stack(black_input_history, dim = 0))
+                
+            #input_seqs.append(torch.stack(input_history, dim = 0))
             outputs.append(output)
     
         dataset = RBCDataset(input_seqs, outputs)

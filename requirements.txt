@@ -1,2 +1,3 @@
 reconchess
 torch
+notebook
